@@ -1,58 +1,33 @@
 from app.database import db
-from app.models import Login
+from app.shemas import UserInfo
+from app.models import User
+from sqlalchemy import update,delete
 
 
 def get_all_users():
-    sql = {}
-
-    sql.cursor.execute("""SELECT id, name, role FROM user;""")
-    res = sql.cursor.fetchall()
+    session = db.session()
+    users = session.query(User)
     result = []
-    if res:
-        for item in res:
-            result.append({"id": item[0],
-                           "name": item[1],
-                           "role": item[2]})
-
+    for user in users:
+        result.append(user)
     return result
 
 
-def update_user(role, name, user_id):
-    try:
-        sql = {}
-        query = f"update user set role = {role}, name = {name}  WHERE id = {user_id}"
-        sql.cursor.execute(query)
-        sql.connection.commit()
-    except BaseException as e:
-        return e
-    return None
+def get_user(user_id: int):
+    session = db.session()
+    user = session.query(User).where(User.id == user_id).first()
+    return user
 
 
-def delete_user(user_id):
-    try:
-        sql = {}
-        query = f"DELETE user WHERE id = {user_id}"
-        sql.cursor.execute(query)
-        sql.connection.commit()
-    except BaseException as e:
-        return e
-    return None
+def update_user(user: UserInfo):
+    session = db.session()
+    user = session.execute(update(User).where(User.id == user.id).values(user.dict()))
+    session.commit()
+    return user
 
 
-def insert_user(raw):
-    try:
-        sql = {}
-        sql.cursor.execute("SELECT max(id) FROM user;")
-        max_id = sql.cursor.fetchone()
-        print(max_id)
-        max_id += 1
-        query = f"insert into user values ({max_id},?,?,?,?)"
-        sql.cursor.execute(query, raw)
-        sql.connection.commit()
-    except BaseException as e:
-        return e
-    return None
-
-
-async def user_login(Login):
+def delete_user(user_id: int):
+    session = db.session()
+    session.execute(delete(User).where(User.id == user_id))
+    session.commit()
     return True

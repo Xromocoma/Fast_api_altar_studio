@@ -1,24 +1,31 @@
+import json
+
 from fastapi import FastAPI, status
-from app.core.user import get_all_users, user_login
+from app.core.user import get_all_users, get_user,update_user, delete_user
 from starlette import requests, responses
-from app.models import Login, User
+from app.shemas import Login, UserInfo
 
-my_app = FastAPI()
+app = FastAPI()
 
 
-@my_app.get("/")
+@app.get("/")
 async def example():
+    return 'OK'
+
+
+@app.get("/users")
+async def get_users():
+
     return get_all_users()
 
-@my_app.get("/test")
-async def example():
-    return responses.JSONResponse(status_code=200, content={"is": "ok"})
+@app.get("/user/<user_id>")
+async def get_user_by_id(user_id: int):
+    return get_user(user_id)
 
+@app.post("/user/update")
+async def update_user_data(user_data: UserInfo):
+    return update_user(user_data)
 
-
-@my_app.post("/login")
-async def login(login_data: Login):
-    res = await user_login(login_data)
-    if res:
-        return responses.JSONResponse(status_code=status.HTTP_200_OK)
-    return responses.Response(status_code=status.HTTP_401_UNAUTHORIZED)
+@app.delete("/user/<user_id>")
+async def user_del(user_id: int):
+    return delete_user(user_id)
