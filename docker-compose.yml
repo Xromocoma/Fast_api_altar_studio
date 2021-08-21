@@ -1,0 +1,52 @@
+version: '3.5'
+services:
+#  backend:
+#      build:
+#        context: .
+#        dockerfile: ./Dockerfile
+#      ports:
+#        - "9696:9696"
+#      volumes:
+#        - .:/code
+#      environment:
+#        MONGO_HOST: cloud-dev-mongo-node-1
+#        MONGO_PORT: 27017
+#        MONGO_USER: usr
+#        MONGO_PASSWORD: SWLMjcR9uTGPQ7qj
+##      networks: [docker-net]
+#      network_mode: host
+#      restart: on-failure
+
+  web:
+    image: nginx
+    volumes:
+      - ./docker/nginx:/etc/nginx/conf.d
+      - ./frontend:/app
+#    ports:
+#      - "8080:8080"
+    environment:
+      NGINX_HOST: 0.0.0.0
+      NGINX_PORT: 8080
+#    networks: [docker-net]
+    network_mode: host
+    restart: on-failure
+
+  db:
+    image: postgres:13
+    #    networks: [docker-net]
+    network_mode: host
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/postgre/db:/var/lib/postgresql/data
+      - ./docker/postgre/init:/docker-entrypoint-initdb.d/
+    environment:
+      POSTGRES_PASSWORD: qwerty
+      POSTGRES_USER: postgres
+      POSTGRES_DB: altar_db
+
+    restart: always
+
+networks:
+  docker-net:
+    driver: bridge
