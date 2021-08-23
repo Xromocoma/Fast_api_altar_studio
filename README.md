@@ -45,7 +45,7 @@ docker-compose up --build -d
 email: www.kraken@mail.ru
 pass: 123456
 
-email: alar.studio@gmail.ru
+email: alar.studio@gmail.com
 pass: 123456
 ```
 
