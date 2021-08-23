@@ -4,11 +4,12 @@ import aiofiles
 
 from app.config import settings
 
+
 async def collect_data():
     tasks = [
-         exception_filter(get_data_from_source('data1.json')),
-         exception_filter(get_data_from_source('data2.json')),
-         exception_filter(get_data_from_source('data3.json'))
+        exception_filter(get_data_from_source('data1.json')),
+        exception_filter(get_data_from_source('data2.json')),
+        exception_filter(get_data_from_source('data3.json'))
     ]
     res = await gather(*tasks)
     temp = []
@@ -30,5 +31,3 @@ async def exception_filter(function):
         return await wait_for(function, timeout=2)
     except:
         return []
-
-
