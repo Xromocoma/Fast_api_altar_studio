@@ -38,8 +38,8 @@ def user_update(user_id: int, user_data: UserUpdate):
 # Удаление юзера по UID
 @router.delete("/users/{user_id}",
                dependencies=[Depends(is_authentication), Depends(is_admin), Security(security)])
-def user_del(user_id: int):
-    if delete_user(user_id):
+def user_del(user_id: int, credentials: HTTPAuthorizationCredentials = Security(security)):
+    if delete_user(user_id, credentials.credentials):
         return Response(status_code=status.HTTP_200_OK)
 
 # Добавление юзера

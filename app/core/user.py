@@ -62,14 +62,18 @@ def update_user(user_id: int, user: dict) -> bool:
     return True
 
 
-def delete_user(user_id: int) -> bool:
+def delete_user(user_id: int, token: str) -> bool:
     """
     удаление юзера по ID
+    :param token:
     :param user_id:
     :return: bool
     """
     if not get_user(user_id):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User not found')
+    user_data = auth.parse_jwt_token(token)
+    if user_data['id'] == user_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='You can`t delete yourself')
     session = db.session()
     session.execute(delete(User).where(User.id == user_id))
     session.commit()
