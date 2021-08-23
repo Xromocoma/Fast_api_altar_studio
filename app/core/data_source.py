@@ -1,6 +1,7 @@
-import asyncio
-import json
+from asyncio import gather, wait_for
+from json import loads
 import aiofiles
+
 from app.config import settings
 
 async def collect_data():
@@ -9,7 +10,7 @@ async def collect_data():
          exception_filter(get_data_from_source('data2.json')),
          exception_filter(get_data_from_source('data3.json'))
     ]
-    res = await asyncio.gather(*tasks)
+    res = await gather(*tasks)
     temp = []
     for list_data in res:
         for item in list_data:
@@ -19,14 +20,14 @@ async def collect_data():
 
 async def get_data_from_source(name_file):
     async with aiofiles.open(settings.PATH_TO_SOURCE + name_file) as f:
-        data = json.loads(await f.read())
+        data = loads(await f.read())
         await f.close()
     return data
 
 
 async def exception_filter(function):
     try:
-        return await asyncio.wait_for(function, timeout=2)
+        return await wait_for(function, timeout=2)
     except:
         return []
 

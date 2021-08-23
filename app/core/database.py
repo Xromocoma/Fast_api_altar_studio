@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from app.config import settings
 from sqlalchemy.ext.declarative import declarative_base
+
+from app.config import settings
 
 
 class PostgreDB:

@@ -1,7 +1,9 @@
 from fastapi import FastAPI
-from app.routers.v1.urls import router
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.config import settings
+from app.routers.v1.urls import router
+
 
 origins = [
     "http://0.0.0.0:80",

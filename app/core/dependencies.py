@@ -1,7 +1,9 @@
 from fastapi.security import HTTPBearer
 from fastapi import Request
-from app.core.authorization import auth
 from fastapi import HTTPException, status
+
+from app.core.authorization import auth
+
 
 security = HTTPBearer()
 

@@ -22,4 +22,5 @@ class Settings(BaseSettings):
     PATH_PWD = getenv('PATH_PWD')
     PATH_TO_SOURCE = f'{PATH_PWD}/app/json_data/'
 
+
 settings = Settings()

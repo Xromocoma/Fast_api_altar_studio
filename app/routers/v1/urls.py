@@ -1,10 +1,12 @@
+from typing import List
+from fastapi import status, Response, Depends, Security, APIRouter
+from fastapi.security import HTTPAuthorizationCredentials
+
 from app.core.user import get_all_users, get_user, update_user, delete_user, user_login, create_user, user_logout
 from app.core.data_source import collect_data
 from app.shemas import UserLogin, UserCreate, UserUpdate, UserInfo
-from typing import List
 from app.core.dependencies import is_authentication, security, is_admin
-from fastapi import status, Response, Depends, Security, APIRouter
-from fastapi.security import HTTPAuthorizationCredentials
+
 
 
 router = APIRouter()

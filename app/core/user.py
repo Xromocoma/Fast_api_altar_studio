@@ -2,10 +2,11 @@ import hashlib
 import json
 from typing import List
 from fastapi import HTTPException, status
-from app.database import db
+from sqlalchemy import update, delete
+
 from app.shemas import UserCreate, UserLogin
 from app.models import User
-from sqlalchemy import update, delete
+from app.core.database import db
 from app.core.authorization import auth
 
 

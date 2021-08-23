@@ -57,7 +57,7 @@ services:
     image: nginx
     volumes:
       - ./docker/nginx:/etc/nginx/conf.d
-      - ./front:/app
+      - ./frontend:/app
     ports:
       - "8080:8080"
     environment:
