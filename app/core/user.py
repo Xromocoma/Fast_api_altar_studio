@@ -75,7 +75,7 @@ def delete_user(user_id: int, token: str) -> bool:
     if user_data['id'] == user_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='You can`t delete yourself')
     session = db.session()
-    session.execute(delete(User).where(User.id == user_id))
+    session.execute(update(User).where(User.id == user_id).values(state=False))
     session.commit()
     return True
 
@@ -86,18 +86,18 @@ def create_user(user: UserCreate) -> User:
     :param user:
     :return: User
     """
-    try:
-        session = db.session()
-        new_user = User(email=user.email,
-                        passwd=passwd_to_hash(user.passwd),
-                        name=user.name,
-                        state=user.state,
-                        is_admin=user.is_admin)
-        session.add(new_user)
-        session.commit()
-        return new_user
-    except:
+    session = db.session()
+    user_in_base = session.query(User).where(User.email == user.email, User.state == True).first()
+    if user_in_base:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Email already used')
+    new_user = User(email=user.email,
+                    passwd=passwd_to_hash(user.passwd),
+                    name=user.name,
+                    state=user.state,
+                    is_admin=user.is_admin)
+    session.add(new_user)
+    session.commit()
+    return new_user
 
 
 def passwd_to_hash(password: str) -> str:
@@ -117,7 +117,7 @@ def user_login(user: UserLogin) -> str:
     """
     session = db.session()
     user.passwd = passwd_to_hash(user.passwd)
-    user_in_base = session.query(User).where(User.email == user.email).first()
+    user_in_base = session.query(User).where(User.email == user.email, User.state == True).first()
     if not user_in_base:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User not found')
     if user_in_base.passwd != user.passwd:

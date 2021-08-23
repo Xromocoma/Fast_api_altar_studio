@@ -1,6 +1,6 @@
 CREATE TABLE if not exists "users"(
     id serial PRIMARY KEY,
-    email varchar(255) not null UNIQUE ,
+    email varchar(255) not null,
     passwd varchar not null,
     name varchar(255) not null,
     state boolean not null DEFAULT TRUE ,
