@@ -50,8 +50,9 @@ services:
       networks: [docker-net]
       restart: always
       depends_on:
-        - redis
         - db
+        - redis
+
 
   web:
     image: nginx

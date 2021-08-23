@@ -35,6 +35,6 @@ async def is_admin(request: Request) -> None:
         access_token = access_token.split()[1]
         if access_token == "null":
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="you haven`t Authorization")
-        is_admin = auth.is_admin(token=access_token)
-        if not is_admin:
+        admin = auth.is_admin(token=access_token)
+        if not admin:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")

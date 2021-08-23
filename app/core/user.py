@@ -2,7 +2,7 @@ import hashlib
 import json
 from typing import List
 from fastapi import HTTPException, status
-from sqlalchemy import update, delete
+from sqlalchemy import update
 
 from app.shemas import UserCreate, UserLogin
 from app.models import User
