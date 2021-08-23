@@ -1,6 +1,0 @@
-fastapi
-uvicorn
-mongoengine
-pydantic[email]
-SQLAlchemy
-psycopg2-binary

@@ -11,4 +11,3 @@ class User(db.base):
     name = Column(String)
     state = Column(Boolean, default=1)
     is_admin = Column(Boolean, default=0)
-

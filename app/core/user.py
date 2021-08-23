@@ -1,93 +1,134 @@
 import hashlib
-from fastapi import HTTPException
+import json
+from typing import List
+from fastapi import HTTPException, status
 from app.database import db
-from app.shemas import UserData, UserUpdate, UserLogin, UserLogout
+from app.shemas import UserCreate, UserLogin
 from app.models import User
 from sqlalchemy import update, delete
 from app.core.authorization import auth
 
 
-def get_all_users():
+def get_all_users() -> List[User]:
+    """
+    Получение списка всех юзеров
+    :return: List[User]
+    """
     session = db.session()
-    users = session.query(User)
+    users = session.query(User).where(User.state == True)
     result = []
     for user in users:
         result.append(user)
     return result
 
 
-def get_user(user_id: int):
+def get_user(user_id: int) -> User:
+    """
+    Получить юзера по ID
+    :param user_id:
+    :return: User
+    """
     session = db.session()
-    user = session.query(User).where(User.id == user_id).first()
+    user = session.query(User).where(User.id == user_id, User.state == True).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User not found')
     return user
 
 
-def update_user(user_id: int, user: dict):
+def update_user(user_id: int, user: dict) -> bool:
     """
+    Обновить юзера по ID, обновляемые поля динамические.
     :param user_id:
     :param user:
-    :return:
+    :return: bool
     """
-    # создаем новый dict с не пустыми значениями
+    if not get_user(user_id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User not found')
+    # создаем новый dict с НЕ пустыми значениями для апдейта
     update_values = {}
     for item in user:
-        if user[item]:
+        if user[item] != None and user[item] != '':
             update_values.update({item: user[item]})
 
     if update_values.get('passwd'):
         update_values['passwd'] = passwd_to_hash(update_values['passwd'])
 
     session = db.session()
-    user_in_base = session.query(User).where(User.id == user_id).first()
-    if not user_in_base:
-        HTTPException(status_code=400, detail='User not found')
-    user = session.execute(update(User).where(User.id == user_id).values(**update_values))
-    print(user)
+    session.execute(update(User).where(User.id == user_id).values(**update_values))
     session.commit()
+    user = get_user(user_id)
+    auth.create_jwt_token(user)
+    return True
 
-    return user
 
-
-def delete_user(user_id: int):
+def delete_user(user_id: int) -> bool:
+    """
+    удаление юзера по ID
+    :param user_id:
+    :return: bool
+    """
+    if not get_user(user_id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User not found')
     session = db.session()
     session.execute(delete(User).where(User.id == user_id))
     session.commit()
     return True
 
 
-def create_user(user: UserData):
-    session = db.session()
-    new_user = User(email=user.email,
-                    passwd=passwd_to_hash(user.passwd),
-                    name=user.name,
-                    state=user.state,
-                    is_admin=user.is_admin)
-    session.add(new_user)
-    session.commit()
+def create_user(user: UserCreate) -> User:
+    """
+    Добавление нового пользователя
+    :param user:
+    :return: User
+    """
+    try:
+        session = db.session()
+        new_user = User(email=user.email,
+                        passwd=passwd_to_hash(user.passwd),
+                        name=user.name,
+                        state=user.state,
+                        is_admin=user.is_admin)
+        session.add(new_user)
+        session.commit()
+        return new_user
+    except:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Email already used')
 
 
-def passwd_to_hash(password):
+def passwd_to_hash(password: str) -> str:
+    """
+    Хэширование пароля
+    :param password:
+    :return: str
+    """
     return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
 
-def user_login(user: UserLogin):
+def user_login(user: UserLogin) -> str:
+    """
+    Функция логина, проверяет наличие юзера в базе и выдает токен авторизации
+    :param user:
+    :return: str
+    """
     session = db.session()
     user.passwd = passwd_to_hash(user.passwd)
     user_in_base = session.query(User).where(User.email == user.email).first()
     if not user_in_base:
-        HTTPException(status_code=400, detail='User not found')
-    if user_in_base.password != user.passwd:
-        HTTPException(status_code=400, detail='email or password invalid')
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User not found')
+    if user_in_base.passwd != user.passwd:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Email or password invalid')
     access_token = auth.create_jwt_token(user_in_base)
-    return {"access_token": access_token, "admin": True}
+    return json.dumps({"access_token": access_token, "admin": user_in_base.is_admin})
 
 
-def user_logout(user: UserLogout) -> bool or Exception:
-    session = db.session()
-    user.passwd = passwd_to_hash(user.passwd)
-    user_in_base = session.query(User).where(User.id == user.id).first()
-    if not user_in_base:
-        HTTPException(status_code=400, detail='User not found')
-
-    auth.remove_jwt_token(user.id)
+def user_logout(token: str) -> bool:
+    """
+    Выход пользователя, удаление токена
+    :param token:
+    :return: bool
+    """
+    user = auth.parse_jwt_token(token)
+    if not get_user(user['id']):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User not found')
+    auth.remove_jwt_token(user['id'])
     return True

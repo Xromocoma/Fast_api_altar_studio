@@ -3,6 +3,8 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
+    API_V1: str = getenv('API_V1', '/api/v1')
+
     POSTGRES_DB: str = getenv('POSTGRES_DB', 'alar_db')
     POSTGRES_HOST: str = getenv('POSTGRES_HOST', '127.0.0.1')
     POSTGRES_PORT: int = getenv('POSTGRES_PORT', 5432)
@@ -17,5 +19,7 @@ class Settings(BaseSettings):
 
     JWT_KEY: str = getenv('JWT_KEY', "P9;FrLVK,}tY:RHaR[2z2|]/Sfvn:1OZcDvs1p`C7C<h0BhFGM8e2}05mal:I9ZOx{{W6X[6v3Nh2m/;S|xOYSeA9wl9|6.aJ.J{.--atoJT7KREiTWH=WSf?bvL{Dg")
 
+    PATH_PWD = getenv('PATH_PWD')
+    PATH_TO_SOURCE = f'{PATH_PWD}/app/json_data/'
 
 settings = Settings()

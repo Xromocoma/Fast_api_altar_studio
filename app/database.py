@@ -7,7 +7,6 @@ from sqlalchemy.ext.declarative import declarative_base
 class PostgreDB:
     def __init__(self):
         self.engine = create_engine(settings.POSTGRES_ENGINE_URI,
-                                    echo=True,
                                     pool_size=6,
                                     max_overflow=10,
                                     pool_pre_ping=True
